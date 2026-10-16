@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "calza-app",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "calza-db",
+      "database_id": "REEMPLAZAR_ID_D1"
+    }
+  ],
+  "vars": {
+    "AI_PROVIDER": "none",
+    "AI_MODEL": "google/gemini-2.5-flash"
+  }
+}
