@@ -11,3 +11,6 @@ test('no mezcla comunas',()=>assert.equal(scoreMatch(d,{...l,commune:'Providenci
 test('normaliza nombres de comunas',()=>assert.equal(communeKey('San Javier de Loncomilla'),communeKey('San Javier')));
 test('extractor local identifica UF y tipo',()=>{const r=extractLocally('Vendo depto 2 dormitorios, 2 baños, UF 4.850');assert.equal(r.amount,4850);assert.equal(r.bedrooms,2);assert.equal(r.category,'departamento')});
 test('extractor local no inventa ubicación',()=>assert.equal(extractLocally('Busco casa $120.000.000').commune,''));
+
+test('no confunde coma final con parte del precio',()=>{const r=extractLocally('Busco departamento en Ñuñoa, hasta UF 5.000, 2d 2b 1e');assert.equal(r.amount,5000);assert.equal(r.bedrooms,2);assert.equal(r.bathrooms,2);assert.equal(r.parking,1)});
+test('extrae superficie chilena escrita con miles',()=>{const r=extractLocally('Terreno de 6.200 m², UF 16.500');assert.equal(r.area_m2,6200);assert.equal(r.amount,16500)});
