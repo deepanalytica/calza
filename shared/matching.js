@@ -43,6 +43,13 @@ export function scoreMatch(demand, listing) {
   return {compatible:true,score,blockers:[],positives};
 }
 
+/** Valor numérico chileno: UF 5.000, CLP 120.000.000 o 120,5 m². */
+function parseChileanNumber(text){
+  const x=String(text).trim().replace(/[.,]+$/,'');
+  if(/^\d{1,3}(?:\.\d{3})+(?:,\d+)?$/.test(x))return Number(x.replace(/\./g,'').replace(',','.'))||0;
+  if(/^\d{1,3}(?:,\d{3})+(?:\.\d+)?$/.test(x))return Number(x.replace(/,/g,''))||0;
+  return Number(x.replace(',','.'))||0;
+}
 /** Extracción local aproximada: el usuario confirma campos antes de guardar. */
 export function extractLocally(raw) {
   const txt = String(raw).slice(0,4000), low = norm(txt);
@@ -54,20 +61,20 @@ export function extractLocally(raw) {
   let amount=0,currency='UF';
   if(currencyMatch){
     currency=/^\s*UF/i.test(currencyMatch[0])?'UF':'CLP';
-    const compact=currencyMatch[1].replace(/\s/g,'');
+    const compact=currencyMatch[1].replace(/\s/g,'').replace(/[.,]+$/,'');
     const cleaned = compact.includes(',') && compact.includes('.')
       ? compact.replace(/\./g,'').replace(',','.')
       : (/^\d{1,3}(\.\d{3})+$/.test(compact)?compact.replace(/\./g,''):compact.replace(',','.'));
     amount = Number(cleaned) || 0;
   }
-  const bed=txt.match(/(\d+)\s*(?:dormitorios?|habitaciones?|dorm\b)/i);
-  const bath=txt.match(/(\d+)\s*(?:baños?|banos?)/i);
-  const park=txt.match(/(\d+)\s*(?:estacionamientos?|parking)/i);
-  const area=txt.match(/([\d.,]+)\s*m[²2]\b/i);
+  const bed=txt.match(/(\d+)\s*(?:dormitorios?|habitaciones?|dorm\b|d\b)/i);
+  const bath=txt.match(/(\d+)\s*(?:baños?|banos?|b\b)/i);
+  const park=txt.match(/(\d+)\s*(?:estacionamientos?|parking|e\b)/i);
+  const area=txt.match(/([\d.,]+)\s*m[²2](?=\s|$|[.,;])/i);
   return { title:txt.replace(/\s+/g,' ').slice(0,100),operation,category,commune:'',amount,
     currency,bedrooms:bed?Number(bed[1]):0,bathrooms:bath?Number(bath[1]):0,
-    parking:park?Number(park[1]):0,area_m2:area?Number(area[1].replace(',','.')):0,
+    parking:park?Number(park[1]):0,area_m2:area?parseChileanNumber(area[1]):0,
     description:txt,notes:txt,max_amount:amount,min_bedrooms:bed?Number(bed[1]):0,
     min_bathrooms:bath?Number(bath[1]):0,min_parking:park?Number(park[1]):0,
-    min_area_m2:area?Number(area[1].replace(',','.')):0};
+    min_area_m2:area?parseChileanNumber(area[1]):0};
 }
