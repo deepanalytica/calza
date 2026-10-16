@@ -1,0 +1,21 @@
+// Datos FICTICIOS, sólo para el modo demostración. No representan anuncios reales.
+export const demoListings = [
+ {id:'l1',user_id:'otro',title:'Departamento luminoso con terraza',operation:'venta',category:'departamento',commune:'Ñuñoa',neighborhood:'Plaza Egaña',amount:4800,currency:'UF',bedrooms:2,bathrooms:2,parking:1,area_m2:74,description:'Terraza, bodega y buena conexión. Propiedad de demostración.',visibility:'network',status:'active',broker_name:'Corredor Demo',broker_company:'Inmobiliaria Ejemplo',broker_phone:'',broker_email:'',updated_at:'2026-10-16'},
+ {id:'l2',user_id:'otro',title:'Casa familiar en sector residencial',operation:'venta',category:'casa',commune:'Las Condes',neighborhood:'Los Dominicos',amount:10500,currency:'UF',bedrooms:4,bathrooms:3,parking:2,area_m2:190,description:'Patio amplio. Propiedad de demostración.',visibility:'network',status:'active',broker_name:'Equipo Demo',broker_company:'Corretaje Ejemplo',broker_phone:'',broker_email:'',updated_at:'2026-10-16'},
+ {id:'l3',user_id:'otro',title:'Local comercial en avenida',operation:'arriendo',category:'local',commune:'Curicó',neighborhood:'Centro',amount:1400000,currency:'CLP',bedrooms:0,bathrooms:1,parking:1,area_m2:90,description:'Local de prueba sin ubicación real.',visibility:'network',status:'active',broker_name:'Corredor Demo',broker_company:'Inmobiliaria Ejemplo',broker_phone:'',broker_email:'',updated_at:'2026-10-16'},
+ {id:'l4',user_id:'otro',title:'Terreno plano cercano a zona urbana',operation:'venta',category:'terreno',commune:'Hualañé',neighborhood:'',amount:16500,currency:'UF',bedrooms:0,bathrooms:0,parking:0,area_m2:6200,description:'Terreno hipotético, sólo para probar CALZA.',visibility:'network',status:'active',broker_name:'Equipo Demo',broker_company:'Corretaje Ejemplo',broker_phone:'',broker_email:'',updated_at:'2026-10-16'},
+ {id:'l5',user_id:'otro',title:'Casa con patio en La Florida',operation:'venta',category:'casa',commune:'La Florida',neighborhood:'',amount:118000000,currency:'CLP',bedrooms:3,bathrooms:2,parking:1,area_m2:105,description:'Ejemplo ficticio.',visibility:'network',status:'active',broker_name:'Corredor Demo',broker_company:'Inmobiliaria Ejemplo',broker_phone:'',broker_email:'',updated_at:'2026-10-16'}
+];
+export const demoDemands = [
+ {id:'d1',title:'Comprador busca departamento en Ñuñoa',operation:'venta',category:'departamento',commune:'Ñuñoa',max_amount:5000,currency:'UF',min_bedrooms:2,min_bathrooms:1,min_parking:1,min_area_m2:65,notes:'',status:'active',updated_at:'2026-10-16'},
+ {id:'d2',title:'Familia busca casa en Los Dominicos',operation:'venta',category:'casa',commune:'Las Condes',max_amount:11000,currency:'UF',min_bedrooms:4,min_bathrooms:2,min_parking:1,min_area_m2:140,notes:'',status:'active',updated_at:'2026-10-16'},
+ {id:'d3',title:'Negocio busca local en Curicó',operation:'arriendo',category:'local',commune:'Curicó',max_amount:1600000,currency:'CLP',min_bedrooms:0,min_bathrooms:1,min_parking:0,min_area_m2:70,notes:'',status:'active',updated_at:'2026-10-16'},
+ {id:'d4',title:'Cadena busca terreno en Hualañé',operation:'venta',category:'terreno',commune:'Hualañé',max_amount:17500,currency:'UF',min_bedrooms:0,min_bathrooms:0,min_parking:0,min_area_m2:5000,notes:'',status:'active',updated_at:'2026-10-16'}
+];
+export function normalizeCommune(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+export function demoScore(d,l){
+ if(d.operation!==l.operation||d.category!==l.category||normalizeCommune(d.commune)!==normalizeCommune(l.commune)||d.currency!==l.currency)return null;
+ if(+l.amount>+d.max_amount||+l.bedrooms<+d.min_bedrooms||+l.bathrooms<+d.min_bathrooms||+l.parking<+d.min_parking||+l.area_m2<+d.min_area_m2)return null;
+ return Math.round(86+14*(1- +l.amount/ +d.max_amount));
+}
+export function demoMatches(ds,ls){return ds.filter(d=>d.status==='active').flatMap(d=>ls.filter(l=>l.visibility==='network'&&l.status==='active').map(l=>{const score=demoScore(d,l);return score?{demand_id:d.id,demand_title:d.title,listing:l,broker:{name:l.broker_name||'Corredor demo',company:l.broker_company||'',phone:l.broker_phone||'',email:l.broker_email||''},score,compatible:true,positives:['Comuna solicitada','Presupuesto y requisitos cumplidos']}:null}).filter(Boolean)).sort((a,b)=>b.score-a.score)}
